@@ -3,9 +3,23 @@ const { ContactModel } = require("./contacts.model");
 class ContactsController {
   async listContacts(req, res, next) {
     try {
-      const contacts = await ContactModel.findAllContacts();
+      const filterParams = req.query.sub;
+      const pageParams = Number(req.query.page);
+      const limitParams = Number(req.query.limit);
+      const contacts = await ContactModel.findAllContacts(
+        pageParams,
+        limitParams
+      );
 
-      return res.status(200).send(contacts);
+      if (filterParams) {
+        const filteredContacts = contacts.filter(({ subscription }) => {
+          return subscription === filterParams;
+        });
+
+        return res.status(200).json(filteredContacts);
+      }
+
+      return res.status(200).json(contacts);
     } catch (err) {
       next(err);
     }
@@ -16,8 +30,8 @@ class ContactsController {
       const { contactId } = req.params;
 
       const searchedUser = await ContactModel.findContactById(contactId);
-      if (!searchedUser) return res.status(404).send({ message: "Not found" });
-      return res.status(200).send(searchedUser);
+      if (!searchedUser) return res.status(404).json({ message: "Not found" });
+      return res.status(200).json(searchedUser);
     } catch (err) {
       next(err);
     }
@@ -27,7 +41,7 @@ class ContactsController {
     try {
       const newContact = await ContactModel.createContact(req.body);
 
-      return res.status(201).send(newContact);
+      return res.status(201).json(newContact);
     } catch (err) {
       next(err);
     }
@@ -36,13 +50,13 @@ class ContactsController {
   validateAddContact(req, res, next) {
     const { name, email, phone } = req.body;
     if (!name) {
-      return res.status(400).send({ message: "missing required name field" });
+      return res.status(400).json({ message: "missing required name field" });
     }
     if (!email) {
-      return res.status(400).send({ message: "missing required email field" });
+      return res.status(400).json({ message: "missing required email field" });
     }
     if (!phone) {
-      return res.status(400).send({ message: "missing required phone field" });
+      return res.status(400).json({ message: "missing required phone field" });
     }
     next();
   }
@@ -52,11 +66,11 @@ class ContactsController {
 
     try {
       const searchedUser = await ContactModel.findContactById(contactId);
-      if (!searchedUser) return res.status(404).send({ message: "Not found" });
+      if (!searchedUser) return res.status(404).json({ message: "Not found" });
 
       await ContactModel.deleteContactById(contactId);
 
-      return res.status(200).send({ message: "contact deleted" });
+      return res.status(200).json({ message: "contact deleted" });
     } catch (err) {
       next(err);
     }
@@ -65,7 +79,7 @@ class ContactsController {
   async updateContact(req, res, next) {
     const { name, email, phone } = req.body;
     if (!name && !email && !phone) {
-      return res.status(400).send({
+      return res.status(400).json({
         message:
           "missing fields. You need any of name/email/phone to update contact",
       });
@@ -75,13 +89,13 @@ class ContactsController {
 
     try {
       const searchedUser = await ContactModel.findContactById(contactId);
-      if (!searchedUser) return res.status(404).send({ message: "Not found" });
+      if (!searchedUser) return res.status(404).json({ message: "Not found" });
       const updatedContact = await ContactModel.updateContactById(
         contactId,
         req.body
       );
 
-      return res.status(200).send(updatedContact);
+      return res.status(200).json(updatedContact);
     } catch (err) {
       next(err);
     }
