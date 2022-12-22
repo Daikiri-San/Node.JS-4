@@ -27,7 +27,7 @@
     "cors": "^2.8.5",
     "dotenv": "^8.2.0",
     "express": "^4.17.1",
-    "jsonwebtoken": "^8.5.1",
+    "jsonwebtoken": "^9.0.0",
     "mongo-seeding": "^3.4.1",
     "mongodb": "^3.5.7",
     "mongoose": "^5.9.11",
